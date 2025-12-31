@@ -45,6 +45,22 @@ Provides a comprehensive workflow for building iOS apps, launching them on simul
 
 ---
 
+### 🧭 GH Issue Fix Flow
+
+**Purpose**: Resolve GitHub issues end-to-end using `gh`, local edits, builds/tests, and git push.
+
+Provides a structured flow for reading issues, implementing fixes, validating with XcodeBuildMCP, and shipping changes with a closing commit.
+
+**Key Features**:
+- Fetches full issue context with `gh issue view`
+- Guides code discovery and focused edits
+- Runs targeted builds/tests via XcodeBuildMCP
+- Commits with closing message and pushes
+
+**Use When**: You need to take an issue number, inspect it with `gh`, implement a fix, run tests, and push.
+
+---
+
 ### ⚡ Swift Concurrency Expert
 
 **Purpose**: Review and fix Swift Concurrency issues for Swift 6.2+ codebases.
