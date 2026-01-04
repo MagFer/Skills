@@ -24,6 +24,7 @@ Use this file to find component-specific guidance. Each entry lists when to use 
 - Haptics: `references/haptics.md` — Use for tactile feedback tied to key actions.
 - Matched transitions: `references/matched-transitions.md` — Use for smooth source-to-destination animations.
 - Deep links and URL routing: `references/deeplinks.md` — Use for in-app navigation from URLs.
+- Title menus: `references/title-menus.md` — Use for filter or context menus in the navigation title.
 
 ## Planned components (create files as needed)
 
