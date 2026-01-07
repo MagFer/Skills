@@ -26,6 +26,7 @@ Use this file to find component-specific guidance. Each entry lists when to use 
 - Deep links and URL routing: `references/deeplinks.md` — Use for in-app navigation from URLs.
 - Title menus: `references/title-menus.md` — Use for filter or context menus in the navigation title.
 - Loading & placeholders: `references/loading-placeholders.md` — Use for redacted skeletons, empty states, and loading UX.
+- Lightweight clients: `references/lightweight-clients.md` — Use for small, closure-based API clients injected into stores.
 
 ## Planned components (create files as needed)
 
