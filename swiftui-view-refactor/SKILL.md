@@ -1,12 +1,12 @@
 ---
 name: swiftui-view-refactor
-description: Refactor and review SwiftUI view files for consistent structure, dependency injection, and Observation usage. Use when asked to clean up a SwiftUI view’s layout/ordering, handle view models safely (non-optional when possible), or standardize how dependencies and @Observable state are initialized and passed.
+description: Refactor and review SwiftUI view files for consistent structure, dependency injection, and Observation usage. Use when asked to clean up a SwiftUI view's layout/ordering, implement ViewModels per app section, or standardize how dependencies and @Observable ViewModels are initialized and passed.
 ---
 
 # SwiftUI View Refactor
 
 ## Overview
-Apply a consistent structure and dependency pattern to SwiftUI views, with a focus on ordering, Model-View (MV) patterns, careful view model handling, and correct Observation usage.
+Apply a consistent structure and dependency pattern to SwiftUI views, with a focus on ordering, ViewModels per app section, proper ViewModel initialization, and correct Observation usage.
 
 ## Core Guidelines
 
@@ -20,11 +20,13 @@ Apply a consistent structure and dependency pattern to SwiftUI views, with a foc
 - computed view builders / other view helpers
 - helper / async functions
 
-### 2) Prefer MV (Model-View) patterns
-- Default to MV: Views are lightweight state expressions; models/services own business logic.
-- Favor `@State`, `@Environment`, `@Query`, and `task`/`onChange` for orchestration.
-- Inject services and shared models via `@Environment`; keep views small and composable.
-- Split large views into subviews rather than introducing a view model.
+### 2) Use ViewModels per app section
+- Each major app section or feature should have its own ViewModel to manage state and logic.
+- Use `@Observable` for ViewModels with `@State` in the view.
+- Initialize ViewModels non-optionally in the view's `init` by passing dependencies.
+- Inject services and shared models via `@Environment`; pass them to ViewModels.
+- Keep views declarative and focused on UI; delegate business logic to ViewModels.
+- For simple, stateless components, direct `@State` in the view is acceptable.
 
 ### 3) Split large bodies and view properties
 - If `body` grows beyond a screen or has multiple logical sections, split it into smaller subviews.
@@ -129,21 +131,63 @@ var documentsListView: some View {
 }
 ```
 
-### 4) View model handling (only if already present)
-- Do not introduce a view model unless the request or existing code clearly calls for one.
-- If a view model exists, make it non-optional when possible.
-- Pass dependencies to the view via `init`, then pass them into the view model in the view's `init`.
-- Avoid `bootstrapIfNeeded` patterns.
+### 4) ViewModel initialization and dependency injection
+- Create a ViewModel for each major app section or feature.
+- Make ViewModels non-optional: use `@State private var viewModel: SomeViewModel`.
+- Pass dependencies to the view via `init`, then pass them into the ViewModel in the view's `init`.
+- **Use protocol types for dependencies** (not concrete types) to enable testability and flexibility.
+- Provide default concrete implementations in the initializer signature for convenience.
+- Avoid `bootstrapIfNeeded` patterns or optional ViewModels.
 
-Example (Observation-based):
+Example (Protocol-based dependency injection):
 
 ```swift
-@State private var viewModel: SomeViewModel
+// View
+struct FeatureView: View {
+    @State private var viewModel: FeatureViewModel
 
-init(dependency: Dependency) {
-    _viewModel = State(initialValue: SomeViewModel(dependency: dependency))
+    init(dataService: DataServiceContract = DataService()) {
+        _viewModel = State(initialValue: FeatureViewModel(dataService: dataService))
+    }
+
+    var body: some View {
+        // ...
+    }
+}
+
+// ViewModel
+@MainActor
+@Observable
+final class FeatureViewModel {
+    private let dataService: DataServiceContract
+
+    init(dataService: DataServiceContract) {
+        self.dataService = dataService
+    }
+}
+
+// Protocol
+protocol DataServiceContract {
+    func fetchData() async throws -> [Item]
+}
+
+// Concrete implementation
+final class DataService: DataServiceContract {
+    func fetchData() async throws -> [Item] {
+        // implementation
+    }
 }
 ```
+
+**Benefits of protocol-based DI**:
+- ✅ Enables unit testing with mock implementations
+- ✅ Decouples view/viewModel from concrete service implementations
+- ✅ Maintains convenience with default concrete values
+- ✅ Allows easy substitution of implementations (e.g., for testing, feature flags, or different environments)
+
+**Important**: When using protocol-based dependency injection, ensure the protocol contract includes **all methods** that clients (ViewModels, Views) will use. If you add new functionality to a ViewModel that requires additional service methods, remember to update the protocol contract to include those methods.
+
+For simple, stateless components (like reusable UI components), a ViewModel is not necessary.
 
 ### 5) Observation usage
 - For `@Observable` reference types, store them as `@State` in the root view.
@@ -152,9 +196,9 @@ init(dependency: Dependency) {
 ## Workflow
 
 1) Reorder the view to match the ordering rules.
-2) Favor MV: move lightweight orchestration into the view using `@State`, `@Environment`, `@Query`, `task`, and `onChange`.
+2) For major app sections/features, ensure there's a ViewModel to manage state and business logic. Use `@State`, `@Environment`, `@Query`, `task`, and `onChange` for view-level orchestration.
 3) Ensure stable view structure: avoid top-level `if`-based branch swapping; move conditions to localized sections/modifiers.
-4) If a view model exists, replace optional view models with a non-optional `@State` view model initialized in `init` by passing dependencies from the view.
+4) Ensure ViewModels are non-optional: use `@State private var viewModel: SomeViewModel` initialized in `init` by passing dependencies from the view.
 5) Confirm Observation usage: `@State` for root `@Observable` view models, no redundant wrappers.
 6) Keep behavior intact: do not change layout or business logic unless requested.
 
@@ -162,7 +206,7 @@ init(dependency: Dependency) {
 
 - Prefer small, explicit helpers over large conditional blocks.
 - Keep computed view builders below `body` and non-view computed vars above `init`.
-- For MV-first guidance and rationale, see `references/mv-patterns.md`.
+- For ViewModel architecture guidance and examples, see `references/mv-patterns.md`.
 
 ## Large-view handling
 

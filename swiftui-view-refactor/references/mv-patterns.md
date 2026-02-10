@@ -1,16 +1,86 @@
-# MV Patterns Reference
+# Architecture Patterns Reference
 
-Source provided by user: "SwiftUI in 2025: Forget MVVM" (Thomas Ricouard).
+## Preferred Approach: ViewModels Per App Section
 
-Use this as guidance when deciding whether to introduce a view model.
+Use ViewModels to organize and manage state for each major section of your app. This provides clear separation of concerns and makes complex state management more maintainable.
 
-Key points:
-- Default to MV: views are lightweight state expressions and orchestration points.
-- Prefer `@State`, `@Environment`, `@Query`, `task`, and `onChange` over view models.
-- Inject services and shared models via `@Environment`; keep logic in services/models.
-- Split large views into smaller views instead of moving logic into a view model.
-- Avoid manual data fetching that duplicates SwiftUI/SwiftData mechanisms.
-- Test models/services and business logic; views should stay simple and declarative.
+Key principles:
+- **One ViewModel per app section**: Each major feature or screen should have its own ViewModel to manage its state and business logic.
+- **Use `@Observable` for ViewModels**: Modern Swift Observation provides clean, efficient state management.
+- **Initialize ViewModels in `init`**: Pass dependencies to the view via `init`, then create the ViewModel with those dependencies.
+- **Make ViewModels non-optional**: Use `@State private var viewModel: SomeViewModel` instead of optional ViewModels.
+- **Use protocol types for dependencies**: Inject services using protocol types (not concrete types) to enable testability and flexibility.
+- **Inject services via `@Environment`**: Services and shared state should live in the environment and be passed to ViewModels.
+- **Keep views declarative**: Views should focus on UI layout and delegate logic to the ViewModel.
+
+Example pattern (Protocol-based dependency injection):
+
+```swift
+// Protocol definition
+protocol DataServiceContract {
+    func fetchItems() async throws -> [Item]
+}
+
+// Concrete implementation
+final class DataService: DataServiceContract {
+    func fetchItems() async throws -> [Item] {
+        // Implementation
+    }
+}
+
+// View
+struct FeatureView: View {
+    @State private var viewModel: FeatureViewModel
+
+    init(dataService: DataServiceContract = DataService()) {
+        _viewModel = State(initialValue: FeatureViewModel(dataService: dataService))
+    }
+
+    var body: some View {
+        List(viewModel.items) { item in
+            ItemRow(item: item)
+        }
+        .task {
+            await viewModel.loadData()
+        }
+    }
+}
+
+// ViewModel
+@MainActor
+@Observable
+final class FeatureViewModel {
+    private let dataService: DataServiceContract
+    var items: [Item] = []
+    var isLoading = false
+
+    init(dataService: DataServiceContract) {
+        self.dataService = dataService
+    }
+
+    func loadData() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            items = try await dataService.fetchItems()
+        } catch {
+            // Handle error
+        }
+    }
+}
+```
+
+**Benefits of protocol-based dependency injection**:
+- ✅ Enables unit testing with mock implementations
+- ✅ Decouples components from concrete implementations
+- ✅ Maintains convenience with default concrete values in init
+- ✅ Allows runtime substitution (for testing, feature flags, etc.)
+
+**Critical reminder**: When refactoring to use protocol-based DI, always ensure the protocol contract includes **all methods** that clients will use. If a ViewModel uses multiple methods from a service (e.g., `fetchItems()`, `fetchItem(id:)`, `searchItems(query:)`), all of them must be declared in the protocol, not just a subset.
+
+## Alternative Perspective: Pure MV Pattern
+
+The following article presents an alternative view that favors keeping state directly in views. While this approach works for some projects, our preferred pattern uses ViewModels per section for better organization and testability.
 
 # SwiftUI in 2025: Forget MVVM
 
