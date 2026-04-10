@@ -78,6 +78,70 @@ final class FeatureViewModel {
 
 **Critical reminder**: When refactoring to use protocol-based DI, always ensure the protocol contract includes **all methods** that clients will use. If a ViewModel uses multiple methods from a service (e.g., `fetchItems()`, `fetchItem(id:)`, `searchItems(query:)`), all of them must be declared in the protocol, not just a subset.
 
+## BaseViewModel & Lifecycle
+
+ViewModels should inherit from `BaseViewModel` to leverage the first-appear lifecycle pattern. This keeps initial data loading out of the View and inside the ViewModel where it belongs.
+
+```swift
+// BaseViewModel provides:
+// - onAppear()          → call from the View's .onAppear
+// - onAppearFistTime()  → override to run initial setup (called once)
+// - observeProperty()   → reactive observation helper
+
+@MainActor
+class BaseViewModel: NSObject {
+    private var firstViewAppear: Bool = false
+
+    final func onAppear() {
+        if !firstViewAppear {
+            onAppearFistTime()
+        }
+        firstViewAppear = true
+    }
+
+    func onAppearFistTime() {}
+}
+```
+
+**Usage in ViewModel:**
+
+```swift
+@Observable
+final class FeatureViewModel: BaseViewModel {
+    private let service: FeatureService
+
+    init(service: FeatureService? = nil) {
+        self.service = service ?? .shared
+    }
+
+    override func onAppearFistTime() {
+        super.onAppearFistTime()
+        Task { await loadData() }
+    }
+
+    private func loadData() async { ... }
+}
+```
+
+**Usage in View:**
+
+```swift
+struct FeatureView: View {
+    @State private var viewModel = FeatureViewModel()
+
+    var body: some View {
+        content
+            .onAppear { viewModel.onAppear() }
+    }
+}
+```
+
+**Key rules:**
+- Views call `viewModel.onAppear()` in `.onAppear`, never call data-loading methods directly
+- ViewModels override `onAppearFistTime()` for initial setup (data fetching, observation setup)
+- Views own presentation state (alerts, sheets) and react to ViewModel outputs via `onChange`
+- ViewModels expose read-only outputs; Views should not mutate `private(set)` ViewModel properties
+
 ## Alternative Perspective: Pure MV Pattern
 
 The following article presents an alternative view that favors keeping state directly in views. While this approach works for some projects, our preferred pattern uses ViewModels per section for better organization and testability.
