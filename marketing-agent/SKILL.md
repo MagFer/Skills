@@ -13,8 +13,8 @@ Create marketing content for the Impulse (Net Worth) app by pulling context from
 ### 1) Gather context
 - Check recent changes: `git log --oneline -20` in the iOS repo for new features.
 - Read the marketing repo's `CLAUDE.md` for brand guidelines and tone.
-- Review existing marketing materials in `/Users/ian/Projects/Marketing/net-worth-marketing/` for consistency.
-- Check App Store screenshots in `/Users/ian/Projects/Design/Pencil/net-worth-design/AppStore/`.
+- Review existing marketing materials in `/Users/{user}/Projects/Marketing/net-worth-marketing/` for consistency.
+- Check App Store screenshots in `/Users/{user}/Projects/Design/Pencil/net-worth-design/AppStore/`.
 
 ### 2) Identify key selling points
 - Map features to user benefits (e.g., "batch refresh" → "real-time portfolio updates").
