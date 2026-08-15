@@ -64,55 +64,6 @@ Provides a structured flow for reading issues, implementing fixes, validating wi
 
 ---
 
-### ⚡ Swift Concurrency Expert
-
-**Purpose**: Review and fix Swift Concurrency issues for Swift 6.2+ codebases.
-
-Applies actor isolation, Sendable safety, and modern concurrency patterns to resolve compiler errors and improve concurrency compliance. Focuses on minimal behavior changes while ensuring data-race safety.
-
-**Key Features**:
-- Identifies actor context and isolation issues
-- Applies safe fixes preserving existing behavior
-- Handles UI-bound types, protocols, and background work
-- Ensures Sendable compliance
-
-**Use When**: You need to review Swift Concurrency usage, improve concurrency compliance, or fix Swift concurrency compiler errors.
-
----
-
-### 💎 SwiftUI Liquid Glass
-
-**Purpose**: Implement and review SwiftUI features using iOS 26+ Liquid Glass API.
-
-Helps adopt the native Liquid Glass API in SwiftUI interfaces, ensuring correct usage, performance, and design alignment. Supports both new implementations and refactoring existing features.
-
-**Key Features**:
-- Uses native `glassEffect` and `GlassEffectContainer` APIs
-- Ensures proper modifier ordering and composition
-- Handles iOS 26+ availability with fallbacks
-- Implements interactive glass for tappable elements
-- Supports morphing transitions
-
-**Use When**: You need to adopt Liquid Glass in new SwiftUI UI, refactor existing features to Liquid Glass, or review Liquid Glass usage for correctness.
-
----
-
-### 🧩 SwiftUI UI Patterns
-
-**Purpose**: Best practices and example-driven guidance for building SwiftUI views and components.
-
-Provides a structured approach to view composition, state ownership, and component selection, with references to common patterns and scaffolding guidance.
-
-**Key Features**:
-- Component references for TabView, NavigationStack, Sheets, and more
-- Scaffolding guidance for new app wiring
-- Emphasis on SwiftUI-native state and composition
-- Guidance for consistent, maintainable view structure
-
-**Use When**: You need help designing SwiftUI UI, composing screens, or selecting component patterns.
-
----
-
 ### 🔧 SwiftUI View Refactor
 
 **Purpose**: Refactor SwiftUI view files for consistent structure and dependency patterns.
@@ -127,22 +78,6 @@ Applies standardized ordering, Model-View (MV) patterns, and correct Observation
 - Supports dependency injection via `@Environment`
 
 **Use When**: You need to clean up a SwiftUI view's structure, handle view models safely, or standardize dependency injection and Observation usage.
-
----
-
-### 🚀 SwiftUI Performance Audit
-
-**Purpose**: Audit and improve SwiftUI runtime performance from code review and architecture.
-
-Focuses on identifying common SwiftUI performance pitfalls in view code and data flow, recommending targeted refactors, and guiding user-run Instruments profiling when code review is not enough.
-
-**Key Features**:
-- Code-first review for slow rendering, janky scrolling, and excessive updates
-- Targets common SwiftUI pitfalls (unstable identity, heavy `body`, layout thrash)
-- Provides remediation guidance and refactor suggestions
-- Offers a user-run Instruments workflow when needed
-
-**Use When**: You need to diagnose SwiftUI performance issues, improve view/update efficiency, or get guidance on profiling with Instruments.
 
 ---
 
